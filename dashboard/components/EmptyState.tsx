@@ -1,17 +1,17 @@
 #!/usr/bin/env ts-node
 /**
- * EmptyState.tsx --- placeholder shown when a view has no data
+ * EmptyState.tsx --- placeholder shown when a view has nothing to render
  *
  * Contains:
- *   EmptyState: renders a friendly empty message
+ *   EmptyState: renders a muted message
  */
 
-/**
- * Renders a friendly empty message.
- *
- * @param props.message - Message to display.
- * @returns block - Empty-state element.
- */
 export default function EmptyState({ message }: { message: string }) {
-  return <div className="empty-state">{message}</div>;
+  /**
+   * Renders a placeholder message.
+   *
+   * @param props.message - What is missing.
+   * @returns element - Empty state element.
+   */
+  return <p className="empty-state">{message}</p>;
 }
