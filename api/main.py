@@ -12,7 +12,7 @@ from importlib.metadata import PackageNotFoundError, version
 
 from fastapi import FastAPI
 
-from api.routes import compare, results
+from api.routes import compare, results, thresholds
 
 
 def package_version() -> str:
@@ -36,6 +36,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="llmjudge", version=package_version())
     app.include_router(results.router)
     app.include_router(compare.router)
+    app.include_router(thresholds.router)
     return app
 
 

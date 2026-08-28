@@ -56,7 +56,16 @@ def test_repo_filter_selects_one_repo(store: InMemoryResultsStore) -> None:
 
 def test_latest_run_is_the_newest(store: InMemoryResultsStore) -> None:
     """Verifies latest_run agrees with the head of the listing."""
-    assert store.latest_run("llmjudge") == store.list_runs("llmjudge")[0]
+    latest = store.latest_run("llmjudge")
+    assert latest is not None
+    assert latest["id"] == store.list_runs("llmjudge")[0]["id"]
+
+
+def test_latest_run_carries_its_scores(store: InMemoryResultsStore) -> None:
+    """Verifies latest_run returns scores, as ResultsStore.latest_run does."""
+    latest = store.latest_run("llmjudge")
+    assert latest is not None
+    assert latest["scores"] == store.scores[str(latest["id"])]
 
 
 def test_latest_run_is_none_for_an_unseeded_repo(store: InMemoryResultsStore) -> None:
