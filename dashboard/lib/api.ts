@@ -9,8 +9,11 @@
  *   fetchRun: fetches one run with scores
  *   fetchRepos: lists repos that have runs
  *   fetchMetricHistory: score history for one repo and metric
+ *   fetchLatestRun: newest run for a repo, with scores
+ *   fetchThresholds: the floors the merge gate enforces
  */
 
+import type { Thresholds } from "./gate";
 import type { TrendPoint } from "../components/TrendChart";
 
 export interface RunSummary {
@@ -92,4 +95,23 @@ export async function fetchMetricHistory(
 ): Promise<TrendPoint[]> {
   const query = `?metric=${encodeURIComponent(metric)}&limit=${limit}`;
   return getJson<TrendPoint[]>(`/repos/${encodeURIComponent(repo)}/history${query}`);
+}
+
+/**
+ * Fetches the latest run for a repo, with its scores.
+ *
+ * @param repo - Repo whose latest run is wanted.
+ * @returns run - Newest run payload for the repo.
+ */
+export async function fetchLatestRun(repo: string): Promise<RunDetail> {
+  return getJson<RunDetail>(`/repos/${encodeURIComponent(repo)}/latest`);
+}
+
+/**
+ * Fetches the thresholds the merge gate enforces.
+ *
+ * @returns thresholds - Default floor plus every per-repo override.
+ */
+export async function fetchThresholds(): Promise<Thresholds> {
+  return getJson<Thresholds>("/thresholds");
 }
