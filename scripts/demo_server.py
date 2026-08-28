@@ -25,13 +25,24 @@ from api.deps import get_store
 from api.main import create_app
 
 DEFAULT_PORT = 8000
-DEMO_REPOS = ("retrieval-core", "agentflow", "graphmind", "llmjudge", "shipwright")
-DEMO_METRICS = {
-    "faithfulness": 0.91,
-    "answer_relevancy": 0.86,
-    "contextual_precision": 0.83,
-    "hallucination": 0.94,
+DEMO_METRICS = ("faithfulness", "answer_relevancy", "contextual_precision", "hallucination")
+RUNS_PER_REPO = 8
+
+# Each repo gets a starting score per metric and a per-run drift, chosen so the
+# seeded set lands on both sides of the thresholds in ci/thresholds.yaml rather
+# than showing an unbroken row of passes.
+DEMO_PROFILES = {
+    "llmjudge": ((0.93, 0.89, 0.87, 0.95), 0.004),
+    "graphmind": ((0.86, 0.82, 0.79, 0.90), 0.003),
+    "retrieval-core": ((0.88, 0.83, 0.77, 0.86), -0.011),
+    "agentflow": ((0.84, 0.79, 0.72, 0.81), -0.016),
+    "shipwright": ((0.91, 0.88, 0.84, 0.92), -0.009),
 }
+DEMO_REPOS = tuple(DEMO_PROFILES)
+
+# Runs that never produced scores, so the dashboard has to render a lifecycle
+# that is not "succeeded" everywhere.
+DEMO_INCIDENTS = {("agentflow", 6): "failed", ("retrieval-core", 7): "running"}
 
 
 class InMemoryResultsStore:
@@ -111,10 +122,10 @@ class InMemoryResultsStore:
             repo: Repo to look up.
 
         Returns:
-            run: Newest run record, or None when the repo has none.
+            run: Newest run record with its scores, or None when the repo has none.
         """
         runs = self.list_runs(repo, limit=1)
-        return runs[0] if runs else None
+        return self.get_run(str(runs[0]["id"])) if runs else None
 
     def metric_history(self, repo: str, metric: str, limit: int = 30) -> list[dict[str, Any]]:
         """Fetches one metric's score history for a repo, oldest-first.
@@ -156,7 +167,7 @@ class InMemoryResultsStore:
 
 
 def seed(store: InMemoryResultsStore) -> InMemoryResultsStore:
-    """Fills a store with a few runs per repo, drifting scores over time.
+    """Fills a store with several runs per repo, drifting scores over time.
 
     Args:
         store: Store to populate.
@@ -164,16 +175,20 @@ def seed(store: InMemoryResultsStore) -> InMemoryResultsStore:
     Returns:
         store: The same store, seeded.
     """
-    created = datetime.now(UTC) - timedelta(days=len(DEMO_REPOS) * 3)
-    for repo_index, repo in enumerate(DEMO_REPOS):
-        for run_index in range(3):
+    start = datetime.now(UTC) - timedelta(days=21)
+    for repo_index, (repo, (bases, drift)) in enumerate(DEMO_PROFILES.items()):
+        for run_index in range(RUNS_PER_REPO):
             run_id = f"{repo}-{run_index + 1:03d}"
-            store.insert_run(run_id, repo, status="succeeded")
-            created += timedelta(hours=7)
+            status = DEMO_INCIDENTS.get((repo, run_index), "succeeded")
+            store.insert_run(run_id, repo, status=status)
+            created = start + timedelta(hours=run_index * 61 + repo_index * 7)
             store.runs[run_id]["created_at"] = created.isoformat()
-            for metric, base in DEMO_METRICS.items():
-                drift = (run_index - 1) * 0.02 - repo_index * 0.005
-                store.upsert_score(run_id, metric, round(min(1.0, max(0.0, base + drift)), 3))
+            if status != "succeeded":
+                continue
+            for metric_index, metric in enumerate(DEMO_METRICS):
+                wobble = ((run_index * 7 + metric_index * 3) % 5 - 2) * 0.004
+                score = bases[metric_index] + drift * run_index + wobble
+                store.upsert_score(run_id, metric, round(min(1.0, max(0.0, score)), 3))
     return store
 
 
