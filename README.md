@@ -1,17 +1,24 @@
-<h1 align="center">
-  <img src="docs/media/wordmark.png" alt="llmjudge" width="440">
-</h1>
+<div align="center">
 
-<p align="center">
-  Self-hosted LLM evaluation: pytest-style cases, a calibrated multi-judge<br>
-  ensemble, and a CI gate that blocks a regression before it ships.
-</p>
+<img src="docs/media/wordmark.png" alt="llmjudge" width="470" />
 
-<p align="center">
-  <img src="docs/media/dashboard.gif" alt="The dashboard: eval runs, a repo drill-down, and regression trends" width="720">
-</p>
+[![ci](https://github.com/abj360/llmjudge/actions/workflows/ci.yml/badge.svg)](https://github.com/abj360/llmjudge/actions/workflows/ci.yml)
+[![python](https://img.shields.io/badge/python-3.12+-b0892c)](pyproject.toml)
+[![node](https://img.shields.io/badge/node-20-b0892c)](dashboard/package.json)
+[![license](https://img.shields.io/badge/license-MIT-b0892c)](LICENSE.md)
 
-Maintained by [abj360](https://github.com/abj360).
+</div>
+
+&nbsp;&nbsp;&nbsp;&nbsp;Llmjudge is a self-hosted LLM evaluation service that runs a frozen eval
+suite against every pull request and blocks the merge when a repo's blended score falls
+below the threshold it has to clear, with no scores, prompts, or datasets leaving your
+own infrastructure.
+
+<div align="center">
+
+<img src="docs/media/dashboard.gif" alt="The llmjudge dashboard: the merge gate, a repo drill-down, and regression trends" width="940" />
+
+</div>
 
 ## Why llmjudge
 
@@ -47,16 +54,22 @@ scores, datasets, or prompts leave your network.
   tricks, indirect context poisoning, exfiltration), scored as pack resistance.
 - **Results API** (`api/`) — FastAPI service over the Postgres results store:
   runs, scores, per-metric history, and run-to-run comparison endpoints.
-- **Dashboard** (`dashboard/`) — Next.js app for regression trend charts,
-  per-repo drill-downs, and side-by-side run comparison.
+- **Dashboard** (`dashboard/`) — Next.js app showing every repo against the
+  threshold its own merge gate applies, with per-repo drill-downs and
+  regression trend charts.
 
-  ![Regression trends per repo](docs/media/trends.png)
+  ![The merge gate across every repo](docs/media/overview.png)
 
-  Every gated repo charts the same metric against its threshold, labelled with
-  the direction the last two runs moved. Drilling into one repo lists its runs
-  with the score each produced:
+  Each card carries the blended score, the gate it has to clear, and the
+  per-metric bars behind it, so a repo that has slipped reads as such at a
+  glance. Drilling in shows which run it started slipping on:
 
   ![Per-repo run drill-down](docs/media/repo-drilldown.png)
+
+  Trends chart one metric per repo against that repo's own threshold, rather
+  than a single number applied to everything:
+
+  ![Regression trends per repo](docs/media/trends.png)
 - **Job queue** (`jobs/`) — arq/Redis worker fleet with exponential-backoff
   retries, dead-lettering, and queue-depth autoscaling.
 
