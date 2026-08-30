@@ -7,14 +7,10 @@
 [![node](https://img.shields.io/badge/node-20-b0892c)](dashboard/package.json)
 [![license](https://img.shields.io/badge/license-MIT-b0892c)](LICENSE.md)
 
-</div>
-
-&nbsp;&nbsp;&nbsp;&nbsp;Llmjudge is a self-hosted LLM evaluation service that runs a frozen eval
+Llmjudge is a self-hosted LLM evaluation service that runs a frozen eval
 suite against every pull request and blocks the merge when a repo's blended score falls
 below the threshold it has to clear, with no scores, prompts, or datasets leaving your
 own infrastructure.
-
-<div align="center">
 
 <img src="docs/media/dashboard.gif" alt="The llmjudge dashboard: the merge gate, a repo drill-down, and regression trends" width="940" />
 
