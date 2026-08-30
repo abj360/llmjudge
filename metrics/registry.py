@@ -15,6 +15,7 @@ from metrics.contextual_precision_recall import (
     ContextualRecallMetric,
 )
 from metrics.faithfulness import FaithfulnessMetric
+from metrics.g_eval import GEvalMetric
 from metrics.hallucination import HallucinationMetric
 
 METRIC_REGISTRY: dict[str, type[BaseMetric]] = {
@@ -24,6 +25,7 @@ METRIC_REGISTRY: dict[str, type[BaseMetric]] = {
     "contextual_recall": ContextualRecallMetric,
     "hallucination": HallucinationMetric,
     "agent_trajectory": AgentTrajectoryMetric,
+    "g_eval": GEvalMetric,
 }
 
 
