@@ -1,7 +1,7 @@
 :root {
   --color-bg: #0d1117;
   --color-fg: #e6edf3;
-  --color-accent: #4c9aff;
+  --color-accent: #c9a227;
 }
 
 body {
@@ -119,8 +119,8 @@ main section {
 }
 
 .filter-bar button.active {
-  border-color: #4c9aff;
-  color: #4c9aff;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .drill-table {
