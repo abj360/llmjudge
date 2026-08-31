@@ -37,7 +37,6 @@ export default function RunCompare({ payload }: { payload: ComparePayload }) {
         </thead>
         <tbody>
           {Object.entries(payload.deltas).map(([metric, delta]) => (
-
             <tr
               key={metric}
               className={delta < 0 ? "delta-down" : "delta-up"}
