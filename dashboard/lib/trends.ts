@@ -8,6 +8,7 @@
  */
 
 import type { TrendPoint } from "../components/TrendChart";
+import { median } from "./stats";
 
 /**
  * Smooths a score series over a window.
@@ -30,11 +31,14 @@ export function movingAverage(points: TrendPoint[], windowSize: number): number[
  * Computes the score delta between the two newest points.
  *
  * @param points - Score points oldest-first.
- * @returns result - See description.
+ * @returns delta - Change from the previous point; 0 with fewer than two.
  */
 export function latestDelta(points: TrendPoint[]): number {
   const last = points[points.length - 1];
   const prev = points[points.length - 2];
+  if (last === undefined || prev === undefined) {
+    return 0;
+  }
   return last.score - prev.score;
 }
 
@@ -56,11 +60,12 @@ export function trendDirection(points: TrendPoint[]): "improving" | "flat" | "re
  * Flags when the newest point drops below the threshold.
  *
  * @param points - Score points oldest-first.
- * @returns result - See description.
+ * @param threshold - Pass threshold.
+ * @returns regressed - True only when there is a point and it is below.
  */
 export function detectRegression(points: TrendPoint[], threshold: number): boolean {
   const last = points[points.length - 1];
-  return last.score < threshold;
+  return last !== undefined && last.score < threshold;
 }
 
 /**
@@ -83,7 +88,8 @@ export function failureCount(points: TrendPoint[], threshold: number): number {
  */
 export function lastPassingIndex(points: TrendPoint[], threshold: number): number {
   for (let index = points.length - 1; index >= 0; index -= 1) {
-    if (points[index].score >= threshold) {
+    const point = points[index];
+    if (point !== undefined && point.score >= threshold) {
       return index;
     }
   }
@@ -204,7 +210,8 @@ export function sparklinePoints(points: TrendPoint[]): number[] {
 export function consecutiveFailures(points: TrendPoint[], threshold: number): number {
   let count = 0;
   for (let index = points.length - 1; index >= 0; index -= 1) {
-    if (points[index].score >= threshold) {
+    const point = points[index];
+    if (point === undefined || point.score >= threshold) {
       break;
     }
     count += 1;
@@ -245,7 +252,7 @@ export function recentMean(points: TrendPoint[], size: number): number {
  */
 export function directionLabel(points: TrendPoint[]): string {
   const direction = trendDirection(points);
-  return direction[0].toUpperCase() + direction.slice(1);
+  return direction.charAt(0).toUpperCase() + direction.slice(1);
 }
 
 /**
@@ -255,12 +262,7 @@ export function directionLabel(points: TrendPoint[]): string {
  * @returns median - Median score; 0 for an empty series.
  */
 export function medianScore(points: TrendPoint[]): number {
-  if (points.length === 0) {
-    return 0;
-  }
-  const scores = points.map((point) => point.score).sort((a, b) => a - b);
-  const mid = Math.floor(scores.length / 2);
-  return scores.length % 2 === 0 ? (scores[mid - 1] + scores[mid]) / 2 : scores[mid];
+  return median(points.map((point) => point.score));
 }
 
 /**

@@ -7,6 +7,7 @@
  *   filterByStatus: filters runs by status
  */
 
+import { median } from "./stats";
 import type { RunSummary } from "./api";
 
 export const REPOS = ["retrieval-core", "agentflow", "graphmind", "llmjudge", "shipwright"];
@@ -205,9 +206,5 @@ export function medianRunCount(grouped: Record<string, RunSummary[]>): number {
   const counts = Object.values(grouped)
     .map((runs) => runs.length)
     .sort((a, b) => a - b);
-  if (counts.length === 0) {
-    return 0;
-  }
-  const mid = Math.floor(counts.length / 2);
-  return counts.length % 2 === 0 ? (counts[mid - 1] + counts[mid]) / 2 : counts[mid];
+  return median(counts);
 }
