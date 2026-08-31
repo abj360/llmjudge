@@ -202,3 +202,41 @@ def test_latest_run_404_without_runs() -> None:
     store.latest_run = lambda repo: None
     client = make_client(store)
     assert client.get("/repos/empty/latest").status_code == 404
+
+
+def test_metric_history_returns_points_oldest_first() -> None:
+    """Verifies the trend chart gets its points in chart order."""
+    from fastapi.testclient import TestClient
+
+    from scripts.demo_server import build_app
+
+    client = TestClient(build_app())
+    points = client.get("/repos/llmjudge/history", params={"metric": "faithfulness"}).json()
+    assert len(points) > 1
+    assert [p["created_at"] for p in points] == sorted(p["created_at"] for p in points)
+
+
+def test_metric_history_is_empty_for_an_unknown_repo() -> None:
+    """Verifies an unknown repo charts as empty rather than erroring."""
+    from fastapi.testclient import TestClient
+
+    from scripts.demo_server import build_app
+
+    client = TestClient(build_app())
+    response = client.get("/repos/nope/history", params={"metric": "faithfulness"})
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_metric_history_rejects_an_out_of_range_limit() -> None:
+    """Verifies a limit outside the accepted range is refused, not clamped."""
+    from fastapi.testclient import TestClient
+
+    from scripts.demo_server import build_app
+
+    client = TestClient(build_app())
+    for limit in (0, 100_000):
+        response = client.get(
+            "/repos/llmjudge/history", params={"metric": "faithfulness", "limit": limit}
+        )
+        assert response.status_code == 422

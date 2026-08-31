@@ -116,6 +116,24 @@ class InMemoryResultsStore:
         runs = self.list_runs(repo, limit=1)
         return runs[0] if runs else None
 
+    def metric_history(self, repo: str, metric: str, limit: int = 30) -> list[dict[str, Any]]:
+        """Fetches one metric's score history for a repo, oldest-first.
+
+        Args:
+            repo: Repo whose history is wanted.
+            metric: Metric name.
+            limit: Maximum points to return.
+
+        Returns:
+            history: (created_at, score) points oldest-first.
+        """
+        points = [
+            {"created_at": run["created_at"], "score": self.scores[run["id"]][metric]}
+            for run in reversed(self.list_runs(repo))
+            if metric in self.scores.get(str(run["id"]), {})
+        ]
+        return points[-limit:]
+
     def repos_with_runs(self) -> list[str]:
         """Lists repos that have at least one run.
 

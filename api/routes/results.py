@@ -7,6 +7,7 @@ Contains:
     list_runs(): lists recent runs, optionally filtered by repo
     get_run(): fetches one run with its scores
     create_run(): records a new eval run
+    metric_history(): one metric's score history for a repo
 """
 
 from typing import Any
@@ -18,6 +19,9 @@ from api.deps import get_store
 from store.results_store import ResultsStore
 
 router = APIRouter(tags=["results"])
+
+DEFAULT_HISTORY_LIMIT = 30
+MAX_HISTORY_LIMIT = 500
 
 
 class RunCreate(BaseModel):
@@ -220,3 +224,26 @@ def latest_run(repo: str, store: ResultsStore = Depends(get_store)) -> dict[str,
     if run is None:
         raise HTTPException(status_code=404, detail="no runs for repo")
     return run
+
+
+@router.get("/repos/{repo}/history")
+def metric_history(
+    repo: str,
+    metric: str,
+    limit: int = DEFAULT_HISTORY_LIMIT,
+    store: ResultsStore = Depends(get_store),
+) -> list[dict[str, Any]]:
+    """Fetches one metric's score history for a repo, oldest-first.
+
+    Args:
+        repo: Repo whose history is wanted.
+        metric: Metric name to chart.
+        limit: Maximum points to return.
+        store: Results store dependency.
+
+    Returns:
+        history: Points the trend chart plots, oldest-first.
+    """
+    if limit < 1 or limit > MAX_HISTORY_LIMIT:
+        raise HTTPException(status_code=422, detail=f"limit must be 1..{MAX_HISTORY_LIMIT}")
+    return store.metric_history(repo, metric, limit)
