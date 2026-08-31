@@ -8,7 +8,10 @@
  *   fetchRuns: lists recent runs from the API
  *   fetchRun: fetches one run with scores
  *   fetchRepos: lists repos that have runs
+ *   fetchMetricHistory: score history for one repo and metric
  */
+
+import type { TrendPoint } from "../components/TrendChart";
 
 export interface RunSummary {
   id: string;
@@ -72,4 +75,21 @@ export async function fetchRun(runId: string): Promise<RunDetail> {
  */
 export async function fetchRepos(): Promise<string[]> {
   return getJson<string[]>("/repos");
+}
+
+/**
+ * Fetches one metric's score history for a repo.
+ *
+ * @param repo - Repo to chart.
+ * @param metric - Metric name.
+ * @param limit - Maximum points to return.
+ * @returns points - Score points oldest-first.
+ */
+export async function fetchMetricHistory(
+  repo: string,
+  metric: string,
+  limit = 30,
+): Promise<TrendPoint[]> {
+  const query = `?metric=${encodeURIComponent(metric)}&limit=${limit}`;
+  return getJson<TrendPoint[]>(`/repos/${encodeURIComponent(repo)}/history${query}`);
 }
