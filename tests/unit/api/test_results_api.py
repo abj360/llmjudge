@@ -240,3 +240,12 @@ def test_metric_history_rejects_an_out_of_range_limit() -> None:
             "/repos/llmjudge/history", params={"metric": "faithfulness", "limit": limit}
         )
         assert response.status_code == 422
+
+
+def test_app_reports_the_installed_version() -> None:
+    """Verifies /docs cannot advertise a version the package does not have."""
+    from importlib.metadata import version
+
+    from api.main import create_app
+
+    assert create_app().version == version("llmjudge")
