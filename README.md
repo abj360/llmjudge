@@ -1,9 +1,15 @@
-# llmjudge
+<h1 align="center">
+  <img src="docs/media/wordmark.png" alt="llmjudge" width="440">
+</h1>
 
-Self-hosted LLM evaluation platform. Pytest-style test cases, a calibrated
-multi-judge G-Eval ensemble, synthetic dataset generation, agent-trajectory
-scoring, a red-team safety pack, and a CI merge-gate so a regression in any of
-the five repos blocks the PR before it ships.
+<p align="center">
+  Self-hosted LLM evaluation: pytest-style cases, a calibrated multi-judge<br>
+  ensemble, and a CI gate that blocks a regression before it ships.
+</p>
+
+<p align="center">
+  <img src="docs/media/dashboard.gif" alt="The dashboard: eval runs, a repo drill-down, and regression trends" width="720">
+</p>
 
 Maintained by [abj360](https://github.com/abj360).
 
@@ -43,6 +49,14 @@ scores, datasets, or prompts leave your network.
   runs, scores, per-metric history, and run-to-run comparison endpoints.
 - **Dashboard** (`dashboard/`) — Next.js app for regression trend charts,
   per-repo drill-downs, and side-by-side run comparison.
+
+  ![Regression trends per repo](docs/media/trends.png)
+
+  Every gated repo charts the same metric against its threshold, labelled with
+  the direction the last two runs moved. Drilling into one repo lists its runs
+  with the score each produced:
+
+  ![Per-repo run drill-down](docs/media/repo-drilldown.png)
 - **Job queue** (`jobs/`) — arq/Redis worker fleet with exponential-backoff
   retries, dead-lettering, and queue-depth autoscaling.
 
@@ -66,7 +80,7 @@ docker compose -f docker/docker-compose.yml exec api pytest harness/
 ## Architecture
 
 ```
-judgeline/                  # (this repo: llmjudge)
+llmjudge/
 ├── harness/                # LLMTestCase data model + pytest-style eval runner
 ├── metrics/                # BaseMetric + all metric implementations + rubrics
 ├── safety/                 # red-team safety packs (toxicity, injection)
@@ -79,6 +93,7 @@ judgeline/                  # (this repo: llmjudge)
 ├── ci/                     # merge gate, thresholds, audit filter
 ├── dashboard/              # Next.js dashboard (app/, components/, lib/, e2e/)
 ├── docker/                 # one Dockerfile per service + docker-compose.yml
+├── scripts/                # demo server: the API over a seeded in-memory store
 ├── docs/adr/               # architecture decision records
 └── tests/                  # unit / integration / golden (mirrors the source tree)
 ```
