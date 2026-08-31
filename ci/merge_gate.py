@@ -5,7 +5,8 @@ merge_gate.py --- CI merge gate: blocks merges when eval scores regress
 Contains:
     GateResult: outcome of one gate evaluation
     await_eval_run(): polls the API until the eval run finishes
-    evaluate_gate(): compares run scores against thresholds
+    evaluate_gate(): compares run scores against per-metric floors
+    check_blended(): applies the repo's blended-score floor
     main(): CLI entrypoint used by .github/workflows/ci.yml
 """
 
@@ -17,6 +18,8 @@ from dataclasses import dataclass
 from typing import Any
 
 import httpx
+
+from ci.check_thresholds import blended_score, load_threshold_config, resolve_threshold
 
 DEFAULT_TIMEOUT_S = 1200
 POLL_INTERVAL_S = 20
@@ -96,9 +99,36 @@ def main() -> int:
     if not result.passed:
         print(format_regression_report(result, args.repo))
         return 1
-    print(f"merge gate passed: {summarize_scores(payload.get('scores', {}))}")
+    scores = payload.get("scores", {})
+    blended = check_blended(args.repo, scores)
+    if blended is not None:
+        print(blended)
+        return 1
+    print(f"merge gate passed: {summarize_scores(scores)}")
     return 0
 
+
+def check_blended(repo: str, scores: dict[str, float]) -> str | None:
+    """Applies the repo's blended-score floor from ci/thresholds.yaml.
+
+    Per-metric floors catch one metric falling through the floor; this catches
+    a run that sags across several without any single one tripping. The config
+    is the documented place thresholds live, and until now nothing read it.
+
+    Args:
+        repo: Repo the run evaluates.
+        scores: Metric scores from the run.
+
+    Returns:
+        report: Why the gate blocks, or None when the run clears the floor.
+    """
+    if not scores:
+        return f"[{repo}] BLOCKED: run reported no scores"
+    entry = resolve_threshold(load_threshold_config(), repo)
+    blended = blended_score(scores)
+    if blended < entry.threshold:
+        return f"[{repo}] BLOCKED: blended {blended:.3f} below threshold {entry.threshold:.2f}"
+    return None
 
 
 def format_regression_report(result: GateResult, repo: str) -> str:

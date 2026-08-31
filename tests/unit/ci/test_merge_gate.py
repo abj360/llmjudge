@@ -140,3 +140,39 @@ def test_retryable_status() -> None:
 
     assert retryable_status("queued") and retryable_status("running")
     assert not retryable_status("succeeded")
+
+
+def test_check_blended_blocks_a_run_that_sags_across_metrics() -> None:
+    """Verifies a run clearing every floor can still miss the repo threshold."""
+    from ci.merge_gate import check_blended
+
+    # llmjudge's floor is 0.84; each score clears its own per-metric floor.
+    scores = {"faithfulness": 0.81, "answer_relevancy": 0.76, "hallucination": 0.91}
+    report = check_blended("llmjudge", scores)
+    assert report is not None
+    assert "blended" in report
+
+
+def test_check_blended_passes_a_run_above_the_threshold() -> None:
+    """Verifies a strong run clears the blended floor."""
+    from ci.merge_gate import check_blended
+
+    assert check_blended("llmjudge", {"faithfulness": 0.95, "hallucination": 0.95}) is None
+
+
+def test_check_blended_blocks_a_run_with_no_scores() -> None:
+    """Verifies an empty score set blocks rather than averaging to nothing."""
+    from ci.merge_gate import check_blended
+
+    report = check_blended("llmjudge", {})
+    assert report is not None
+    assert "no scores" in report
+
+
+def test_check_blended_uses_the_repos_own_threshold() -> None:
+    """Verifies a repo with a lower floor accepts what llmjudge would reject."""
+    from ci.merge_gate import check_blended
+
+    scores = {"faithfulness": 0.79, "answer_relevancy": 0.79}
+    assert check_blended("llmjudge", scores) is not None
+    assert check_blended("graphmind", scores) is None
