@@ -3,8 +3,11 @@
  * api.ts --- typed client for the llmjudge results API
  *
  * Contains:
+ *   API_BASE: absolute base the API is reached on
+ *   getJson: fetches and decodes one path, failing on a non-2xx
  *   fetchRuns: lists recent runs from the API
  *   fetchRun: fetches one run with scores
+ *   fetchRepos: lists repos that have runs
  */
 
 export interface RunSummary {
@@ -18,7 +21,28 @@ export interface RunDetail extends RunSummary {
   scores: Record<string, number>;
 }
 
-const API_BASE = "/api";
+// Server components fetch during render, where a relative path has no origin
+// to resolve against, so the base has to be absolute. In the browser the Next
+// rewrite still forwards /api, which is what NEXT_PUBLIC_API_BASE defaults to.
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE ?? process.env.LLMJUDGE_API_URL ?? "http://localhost:8000";
+
+async function getJson<T>(path: string): Promise<T> {
+  /**
+   * Fetches one API path and decodes it, refusing anything but a 2xx.
+   *
+   * A failed request must not be decoded as though it succeeded: an error body
+   * would otherwise reach the table as if it were data.
+   *
+   * @param path - Path below the API base, starting with a slash.
+   * @returns body - Decoded JSON response.
+   */
+  const response = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`llmjudge api ${path} answered ${response.status}`);
+  }
+  return (await response.json()) as T;
+}
 
 /**
  * Lists recent runs from the API.
@@ -28,8 +52,7 @@ const API_BASE = "/api";
  */
 export async function fetchRuns(repo?: string): Promise<RunSummary[]> {
   const query = repo ? `?repo=${encodeURIComponent(repo)}` : "";
-  const response = await fetch(`${API_BASE}/runs${query}`);
-  return response.json();
+  return getJson<RunSummary[]>(`/runs${query}`);
 }
 
 /**
@@ -39,8 +62,7 @@ export async function fetchRuns(repo?: string): Promise<RunSummary[]> {
  * @returns run - Run payload with scores.
  */
 export async function fetchRun(runId: string): Promise<RunDetail> {
-  const response = await fetch(`${API_BASE}/runs/${runId}`);
-  return response.json();
+  return getJson<RunDetail>(`/runs/${encodeURIComponent(runId)}`);
 }
 
 /**
@@ -49,6 +71,5 @@ export async function fetchRun(runId: string): Promise<RunDetail> {
  * @returns repos - Sorted distinct repo names.
  */
 export async function fetchRepos(): Promise<string[]> {
-  const response = await fetch(`${API_BASE}/repos`);
-  return response.json();
+  return getJson<string[]>("/repos");
 }
