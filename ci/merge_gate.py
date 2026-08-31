@@ -100,9 +100,6 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
-    sys.exit(main())
-
 
 def format_regression_report(result: GateResult, repo: str) -> str:
     """Formats the gate outcome for the CI log and PR status.
@@ -167,3 +164,7 @@ def retryable_status(status: str) -> bool:
         retryable: True while the run is still making progress.
     """
     return status in ("queued", "running")
+
+
+if __name__ == "__main__":
+    sys.exit(main())
