@@ -21,6 +21,14 @@ own infrastructure.
 
 </div>
 
+## Why llmjudge
+
+A prompt or model change can silently degrade answer quality in ways unit tests
+never catch. llmjudge runs a frozen eval suite against every PR — the same way
+pytest gates code changes — and blocks the merge when a gated metric regresses
+past the repo's threshold. Everything runs on your own infrastructure: no
+scores, datasets, or prompts leave your network.
+
 ## How you use it
 
 1. **Bring the stack up** — `docker compose -f docker/docker-compose.yml up --build`.
@@ -35,14 +43,6 @@ own infrastructure.
 
 Day to day you never open it. It runs in CI and only asks for attention when a
 change made answers worse.
-
-## Why llmjudge
-
-A prompt or model change can silently degrade answer quality in ways unit tests
-never catch. llmjudge runs a frozen eval suite against every PR — the same way
-pytest gates code changes — and blocks the merge when a gated metric regresses
-past the repo's threshold. Everything runs on your own infrastructure: no
-scores, datasets, or prompts leave your network.
 
 ## Feature overview
 
