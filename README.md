@@ -21,6 +21,21 @@ own infrastructure.
 
 </div>
 
+## How you use it
+
+1. **Bring the stack up** — `docker compose -f docker/docker-compose.yml up --build`.
+2. **Write eval cases** in `harness/`, in the pytest style you already use, and run
+   them with `docker compose -f docker/docker-compose.yml exec api pytest harness/`.
+3. **Set the bar** — give each repo its blended-score floor in `ci/thresholds.yaml`.
+4. **Gate your merges** — call `python ci/merge_gate.py --repo <name>` from that
+   repo's workflow. A run below the floor blocks the merge; see
+   [Using the merge gate in another repo](#using-the-merge-gate-in-another-repo).
+5. **Open the dashboard when it blocks you** — it shows which repo slipped, which
+   metric sagged, and the run it started on.
+
+Day to day you never open it. It runs in CI and only asks for attention when a
+change made answers worse.
+
 ## Why llmjudge
 
 A prompt or model change can silently degrade answer quality in ways unit tests
