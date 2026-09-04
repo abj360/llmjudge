@@ -2,14 +2,15 @@
 
 <img src="docs/media/wordmark.png" alt="llmjudge" width="470" />
 
-[![python 3.12+](https://img.shields.io/badge/Python%203.12+-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![python](https://img.shields.io/badge/python-3.12+-b0892c)](pyproject.toml)
+[![node](https://img.shields.io/badge/node-20-b0892c)](dashboard/package.json)
 [![fastapi](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](api/)
 [![postgresql](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)](store/)
 [![redis](https://img.shields.io/badge/Redis-FF4438?logo=redis&logoColor=white)](jobs/)
 [![next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white)](dashboard/package.json)
 [![react](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)](dashboard/package.json)
 [![docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](docker/)
-[![mit](https://img.shields.io/badge/MIT-b0892c?logo=opensourceinitiative&logoColor=white)](LICENSE.md)
+[![license](https://img.shields.io/badge/license-MIT-b0892c)](LICENSE.md)
 
 Llmjudge is a self-hosted LLM evaluation service that runs a frozen eval
 suite against every pull request and blocks the merge when a repo's blended score falls
