@@ -1,18 +1,18 @@
 :root {
-  --bg: #0a0c0f;
-  --surface: #12151a;
-  --surface-raised: #171b21;
-  --border: #232830;
-  --border-soft: #1b1f26;
-  --fg: #e8eaed;
-  --fg-muted: #9aa3ae;
-  --fg-faint: #6b7480;
-  --gold: #c9a227;
-  --gold-dim: rgba(201, 162, 39, 0.14);
-  --pass: #3fb950;
-  --below: #f85149;
-  --running: #58a6ff;
-  --queued: #8b949e;
+  --bg: #fbfaf7;
+  --surface: #ffffff;
+  --surface-raised: #f6f4ef;
+  --border: #ddd8cc;
+  --border-soft: #eae6dc;
+  --fg: #1c1b18;
+  --fg-muted: #57534a;
+  --fg-faint: #767061;
+  --gold: #8f7219;
+  --gold-dim: rgba(143, 114, 25, 0.12);
+  --pass: #1a7f37;
+  --below: #cf222e;
+  --running: #0969da;
+  --queued: #6e7781;
   --serif: "Baskerville", "Iowan Old Style", Georgia, serif;
 }
 
@@ -301,20 +301,20 @@ a {
 
 .gate-badge.pass {
   color: var(--pass);
-  border-color: rgba(63, 185, 80, 0.35);
-  background: rgba(63, 185, 80, 0.1);
+  border-color: rgba(26, 127, 55, 0.32);
+  background: rgba(26, 127, 55, 0.08);
 }
 
 .gate-badge.below {
   color: var(--below);
-  border-color: rgba(248, 81, 73, 0.35);
-  background: rgba(248, 81, 73, 0.1);
+  border-color: rgba(207, 34, 46, 0.32);
+  background: rgba(207, 34, 46, 0.08);
 }
 
 .gate-badge.pending {
   color: var(--running);
-  border-color: rgba(88, 166, 255, 0.35);
-  background: rgba(88, 166, 255, 0.1);
+  border-color: rgba(9, 105, 218, 0.32);
+  background: rgba(9, 105, 218, 0.08);
 }
 
 .status-badge {
@@ -447,7 +447,7 @@ a {
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 1px dashed rgba(201, 162, 39, 0.55);
+  border-top: 1px dashed rgba(143, 114, 25, 0.85);
 }
 
 .trend-threshold span {
